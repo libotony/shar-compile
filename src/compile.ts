@@ -5,8 +5,7 @@ import { Compiler } from './typings'
 
 const outputPattern = {
     '*': [
-        'abi',
-        'evm.bytecode.object'
+        '*'
     ]
 }
 const sourceCache = new Map<string, string>()
@@ -35,7 +34,7 @@ const Compile = async (compiler: Compiler, fileName: string, contractsDirectory:
     input.sources[fileName] = { content: fileContent }
 
     const resolver = (dependency: string): object => {
-        debug(`${dependency} needs to be resolved`)
+        debug(`dep: ${dependency}`)
         try {
             if (!/\S.sol$/.test(fileName)) {
                 throw new Error(`only .sol file accepted: ${fileName}`)
@@ -62,7 +61,6 @@ const Compile = async (compiler: Compiler, fileName: string, contractsDirectory:
             return { error: (e as Error).message }
         }
     }
-
     const ret = compiler.compile(JSON.stringify(input), resolver)
 
     return JSON.parse(ret)
