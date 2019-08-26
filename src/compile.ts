@@ -1,6 +1,7 @@
-const solc = require('solc')
+const debug = require('debug')('sharp:solc-compile')
 import * as path from 'path'
 import * as fs from 'fs'
+import { Compiler } from './typings'
 
 const outputPattern = {
     '*': [
@@ -9,13 +10,8 @@ const outputPattern = {
     ]
 }
 const sourceCache = new Map<string, string>()
-const compiler = solc.setupMethods(require('../soljson-v0.4.24+commit.e67f0147.js'))
 
-const logger = (str: string) => {
-    process.stderr.write(str + '\n')
-}
-
-const Compile = (fileName: string, contractsDirectory: string) => {
+const Compile = async (compiler: Compiler, fileName: string, contractsDirectory: string): Promise<object> => {
     if (!fs.statSync(contractsDirectory).isDirectory()) {
         throw new Error('contract_directory expected a directory')
     }
@@ -39,19 +35,23 @@ const Compile = (fileName: string, contractsDirectory: string) => {
     input.sources[fileName] = { content: fileContent }
 
     const resolver = (dependency: string): object => {
-        logger(`${dependency} needs to be resolved`)
-        if (dependency.startsWith('/')) {
-            return { error: 'require files in the root directory is not allowed' }
-        }
+        debug(`${dependency} needs to be resolved`)
         try {
-            if (dependency.startsWith('/')) {
-                throw new Error('require files in the root directory is not allowed')
-            }
             if (!/\S.sol$/.test(fileName)) {
                 throw new Error(`only .sol file accepted: ${fileName}`)
             }
 
-            const targetPath = path.join(contractsDirectory, dependency)
+            let targetPath: string
+            if (path.isAbsolute(dependency)) {
+                const rPath = path.relative(contractsDirectory, dependency)
+                if (rPath.startsWith('../')) {
+                    throw new Error('require files beyond the build directory is not supported')
+                } else {
+                    targetPath = dependency
+                }
+            }
+            targetPath = path.join(contractsDirectory, dependency)
+
             if (sourceCache.has(targetPath)) {
                 return {contents: sourceCache.get(targetPath)}
             }
@@ -61,7 +61,6 @@ const Compile = (fileName: string, contractsDirectory: string) => {
         } catch (e) {
             return { error: (e as Error).message }
         }
-
     }
 
     const ret = compiler.compile(JSON.stringify(input), resolver)

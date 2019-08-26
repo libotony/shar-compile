@@ -5,3 +5,5 @@
 /coverage/
 /.nyc_output/
 *.tgz
+solc-bin/*
+!solc-bin/.gitkeep

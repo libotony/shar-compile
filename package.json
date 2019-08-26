@@ -1,7 +1,7 @@
 {
-  "name": "sharp-compiler",
+  "name": "sharp-compile",
   "version": "1.0.0",
-  "description": "",
+  "description": "Run solo in the background and run tests in your project.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -13,11 +13,14 @@
   "license": "LGPL-3.0",
   "devDependencies": {
     "@types/node": "^12.7.2",
+    "@types/semver": "^6.0.1",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "semver": "^6.3.0",
+    "solc": "^0.5.11"
   }
 }
