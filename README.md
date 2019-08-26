@@ -1,3 +1,3 @@
-# Sharp Runner
+# Sharp Compile
 
-Run solo in the background and run tests in your project.
+Compile contracts written in solidity.
