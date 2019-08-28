@@ -3,11 +3,14 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { Compiler } from './typings'
 
-const outputPattern = {
-    '*': [
-        '*'
-    ]
+const outputSelection = {
+    '*': {
+        '*': [
+            '*'
+        ]
+    }
 }
+
 const sourceCache = new Map<string, string>()
 
 const Compile = async (compiler: Compiler, fileName: string, contractsDirectory: string): Promise<object> => {
@@ -26,11 +29,9 @@ const Compile = async (compiler: Compiler, fileName: string, contractsDirectory:
         language: 'Solidity',
         sources: {},
         settings: {
-            outputSelection: {
-            }
+            outputSelection
         }
     }
-    input.settings.outputSelection[fileName] = outputPattern
     input.sources[fileName] = { content: fileContent }
 
     const resolver = (dependency: string): object => {
