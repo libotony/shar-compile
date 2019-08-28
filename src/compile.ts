@@ -13,7 +13,7 @@ const outputSelection = {
 
 const sourceCache = new Map<string, string>()
 
-const Compile = async (compiler: Compiler, fileName: string, contractsDirectory: string): Promise<object> => {
+const compile = async (compiler: Compiler, fileName: string, contractsDirectory: string): Promise<object> => {
     if (!fs.statSync(contractsDirectory).isDirectory()) {
         throw new Error('contract_directory expected a directory')
     }
@@ -68,5 +68,5 @@ const Compile = async (compiler: Compiler, fileName: string, contractsDirectory:
 }
 
 export {
-    Compile
+    compile
 }
