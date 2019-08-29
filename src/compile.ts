@@ -7,6 +7,10 @@ const outputSelection = {
     '*': {
         '*': [
             '*'
+        ],
+        '': [
+            'ast',
+            'legacyAST'
         ]
     }
 }
