@@ -1,7 +1,7 @@
 const debug = require('debug')('sharp:solc-compile')
 import * as path from 'path'
 import * as fs from 'fs'
-import { Compiler } from './typings'
+import { Compiler, JSONOutput } from './typings'
 
 const outputSelection = {
     '*': {
@@ -17,7 +17,7 @@ const outputSelection = {
 
 const sourceCache = new Map<string, string>()
 
-const compile = (compiler: Compiler, fileName: string, contractsDirectory: string): object => {
+const compile = (compiler: Compiler, fileName: string, contractsDirectory: string) => {
     if (!fs.statSync(contractsDirectory).isDirectory()) {
         throw new Error('contract_directory expected a directory')
     }
@@ -68,7 +68,7 @@ const compile = (compiler: Compiler, fileName: string, contractsDirectory: strin
     }
     const ret = compiler.compile(JSON.stringify(input), resolver)
 
-    return JSON.parse(ret)
+    return JSON.parse(ret) as JSONOutput
 }
 
 export {
