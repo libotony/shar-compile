@@ -7,7 +7,7 @@ import * as path from 'path'
 import * as https from 'https'
 
 import { Compiler } from './typings'
-import { httpGet } from './utils'
+import { httpGet, httpGetToStream } from './utils'
 
 interface VersionList {
     releases: {
@@ -17,6 +17,7 @@ interface VersionList {
 }
 
 const RepoHost = 'https://ethereum.github.io/solc-bin/bin/'
+const listFile = path.join(__dirname, '../solc-bin/list.json')
 let versionList: VersionList
 
 const getMatchedVersion = async (ver: string) => {
@@ -34,11 +35,24 @@ const getVerList = async () => {
     if (versionList) {
         return versionList
     } else {
+        if (fs.existsSync(listFile)) {
+            const stats = fs.lstatSync(listFile)
+            if (new Date().getTime() - stats.mtime.getTime() <= 24 * 60 * 60 * 1000) {
+                versionList = require(listFile) as VersionList
+                return versionList
+            }
+        }
+
         const url = 'https://ethereum.github.io/solc-bin/bin/list.json'
         const data = await httpGet<string>(url)
         versionList = JSON.parse(data) as VersionList
+
+        const fd = fs.openSync(listFile, 'w')
+        fs.writeSync(fd, JSON.stringify(versionList, null, 4), null, 'utf-8')
+        fs.closeSync(fd)
+
+        return versionList
     }
-    return versionList
 }
 
 const localOrRemote = async (ver: string) => {
@@ -51,19 +65,7 @@ const localOrRemote = async (ver: string) => {
     } else {
         debug('load solc from remote')
         const stream = fs.createWriteStream(p)
-        await new Promise((resolve, reject) => {
-            https.get(RepoHost + ver, res => {
-                if (res.statusCode !== 200) {
-                    reject(new Error('Invalid response code: ' + res.statusCode))
-                }
-                res.pipe(stream)
-                res.on('end', () => {
-                    resolve()
-                })
-            }).on('error', (err) => {
-                reject(err)
-            })
-        })
+        await httpGetToStream(RepoHost + ver, stream)
         return solc.setupMethods(require(p))
     }
 }
