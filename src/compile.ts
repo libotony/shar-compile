@@ -17,15 +17,17 @@ const outputSelection = {
 
 const sourceCache = new Map<string, string>()
 
-const compile = (compiler: Compiler, fileName: string, contractsDirectory: string) => {
+const compile = (compiler: Compiler, target: { file: string, contractsDirectory: string }) => {
+    const { file, contractsDirectory } = target
+
     if (!fs.statSync(contractsDirectory).isDirectory()) {
         throw new Error('contract_directory expected a directory')
     }
-    if (!/\S.sol$/.test(fileName)) {
-        throw new Error(`only .sol file accepted: ${fileName}`)
+    if (!/\S.sol$/.test(file)) {
+        throw new Error(`only .sol file accepted: ${file}`)
     }
 
-    const filePath = path.join(contractsDirectory, fileName)
+    const filePath = path.join(contractsDirectory, file)
     const fileContent = fs.readFileSync(filePath, { encoding: 'utf-8' })
 
     // Input
@@ -36,13 +38,13 @@ const compile = (compiler: Compiler, fileName: string, contractsDirectory: strin
             outputSelection
         }
     }
-    input.sources[fileName] = { content: fileContent }
+    input.sources[file] = { content: fileContent }
 
     const resolver = (dependency: string): object => {
         debug(`dep: ${dependency}`)
         try {
-            if (!/\S.sol$/.test(fileName)) {
-                throw new Error(`only .sol file accepted: ${fileName}`)
+            if (!/\S.sol$/.test(dependency)) {
+                throw new Error(`only .sol file accepted: ${dependency}`)
             }
 
             let targetPath: string
