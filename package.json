@@ -1,7 +1,7 @@
 {
-  "name": "sharp-compile",
+  "name": "@libotony/sharp-compile",
   "version": "1.0.0-beta.1",
-  "description": "Run solo in the background and run tests in your project.",
+  "description": "Compile solidity codes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
