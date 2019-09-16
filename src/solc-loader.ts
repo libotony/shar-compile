@@ -1,13 +1,13 @@
 const solc: Compiler = require('solc')
 const debug = require('debug')('sharp:solc-loader')
+const requireFromString = require('require-from-string')
 
 import * as semver from 'semver'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as https from 'https'
 
 import { Compiler } from './typings'
-import { httpGet, httpGetToStream } from './utils'
+import { httpGet } from './utils'
 
 interface VersionList {
     releases: {
@@ -64,9 +64,17 @@ const localOrRemote = async (ver: string) => {
         return com
     } else {
         debug('load solc from remote')
-        const stream = fs.createWriteStream(p)
-        await httpGetToStream(RepoHost + ver, stream)
-        return solc.setupMethods(require(p))
+        const content = await httpGet(RepoHost + ver)
+        const com = solc.setupMethods(requireFromString(content))
+        try {
+            const fd = fs.openSync(p, 'w')
+            fs.writeSync(fd, content, null, 'utf-8')
+            fs.closeSync(fd)
+        } catch (e) {
+            debug('write solc to file failed: ', e)
+        }
+        return com
+
     }
 }
 
