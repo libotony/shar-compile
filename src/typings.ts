@@ -5,6 +5,17 @@ export interface Compiler {
     setupMethods: (module: any) => Compiler
 }
 
+export type SolcOptions = Partial<{
+    version: string,
+    evmVersion: 'homestead' | 'tangerineWhistle' | 'spuriousDragon' | 'byzantium' | 'constantinople' | 'petersburg',
+    libraries: {
+        [fileName: string]: {
+            [contractName: string]: string
+        }
+    };
+    optimizer: object
+}>
+
 export interface FileMeta {
     [contractName: string]: ContractMeta
 }
